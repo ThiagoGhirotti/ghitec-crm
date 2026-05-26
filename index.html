@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GhiTec CRM — Pipeline de Vendas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#F5F7FA;color:#1C1C1E;min-height:100vh;font-size:14px}
+input,select,textarea{font-family:inherit;font-size:13px;padding:7px 10px;border:1px solid #D1D5DB;border-radius:8px;outline:none;background:#fff;color:#1C1C1E;width:100%;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:#0A3A4A}
+select{cursor:pointer}
+textarea{resize:vertical;min-height:70px;line-height:1.5}
+button{font-family:inherit;cursor:pointer;border-radius:8px;font-size:13px;font-weight:500;transition:opacity .15s,background .15s}
+
+/* Layout */
+.app{max-width:1200px;margin:0 auto;padding:24px 16px}
+.header{background:#0A3A4A;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;border-radius:12px 12px 0 0}
+.header-logo span:first-child{color:#C9A86A;font-size:20px;font-weight:500;letter-spacing:1px}
+.header-logo span:last-child{color:#fff;font-size:20px;font-weight:300}
+.header-sub{color:rgba(255,255,255,.4);font-size:12px;margin-left:10px}
+.btn-new{background:#C9A86A;color:#0A3A4A;border:none;padding:7px 16px;font-weight:600}
+.btn-new:hover{opacity:.88}
+.btn-back{background:transparent;color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.3);padding:6px 14px}
+.btn-back:hover{background:rgba(255,255,255,.1)}
+.btn-save{background:#0A3A4A;color:#fff;border:none;padding:8px 22px}
+.btn-save:hover{background:#0D4D63}
+.btn-cancel{background:#fff;color:#6B7280;border:1px solid #E5E7EB;padding:8px 18px}
+.btn-cancel:hover{background:#F9FAFB}
+.btn-del{background:#fff;color:#C44333;border:1px solid #C44333;padding:8px 16px}
+.btn-del:hover{background:#FAECE7}
+
+/* Cards */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 0 10px}
+.card{background:#fff;border-radius:8px;padding:12px 15px;border-left:3px solid #0A3A4A;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card.accent{border-left-color:#C9A86A}
+.card-label{font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:4px}
+.card-value{font-size:22px;font-weight:500;margin-top:4px;color:#1C1C1E}
+
+/* Filters */
+.filters{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.filter-search{position:relative;flex:1 1 160px;min-width:140px}
+.filter-search i{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:15px;color:#9CA3AF;pointer-events:none}
+.filter-search input{padding-left:32px}
+.filter-count{font-size:12px;color:#9CA3AF;margin-left:auto;white-space:nowrap}
+
+/* Table */
+.table-wrap{overflow-x:auto;border-radius:10px;border:1px solid #E5E7EB;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:700px;table-layout:fixed}
+thead tr{background:#0A3A4A}
+th{padding:9px 12px;text-align:left;font-size:10px;font-weight:500;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tbody tr{border-bottom:1px solid #F3F4F6;cursor:pointer;transition:background .1s}
+tbody tr:nth-child(even){background:#FAFAFA}
+tbody tr:hover{background:#EFF6FF !important}
+td{padding:9px 12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.td-main{font-weight:500;color:#1C1C1E}
+.td-sec{color:#6B7280;font-size:12px}
+.td-val{font-weight:500;font-size:12px;color:#0A3A4A}
+.td-empty{color:#D1D5DB;font-size:12px}
+.no-results{padding:32px;text-align:center;color:#9CA3AF}
+
+/* Badges */
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500;white-space:nowrap}
+
+/* Edit form */
+.edit-header{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-top:16px;border-top:1px solid #E5E7EB}
+.edit-title{font-size:18px;font-weight:500}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px}
+.form-field label{font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px}
+.preview-pipe{margin-top:12px;padding:11px 15px;background:#F0F7FF;border-radius:8px;border-left:3px solid #0A3A4A;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.preview-pipe .label{font-size:12px;color:#6B7280}
+.preview-pipe .value{font-size:17px;font-weight:500;color:#0A3A4A}
+.preview-pipe .detail{font-size:12px;color:#9CA3AF}
+.form-actions{display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:16px;border-top:1px solid #E5E7EB;flex-wrap:wrap;gap:10px}
+.form-actions-right{display:flex;gap:10px}
+
+/* Legend */
+.legend{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:11px;color:#6B7280}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:#1C1C1E;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;opacity:0;transform:translateY(8px);transition:all .25s;z-index:999;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+@media(max-width:640px){
+  .cards{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+  .filter-count{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div style="display:flex;align-items:baseline;gap:6px">
+      <div class="header-logo"><span>Ghi</span><span>Tec</span></div>
+      <span class="header-sub">Pipeline de Vendas</span>
+    </div>
+    <div id="header-btn"></div>
+  </div>
+
+  <div class="cards" id="cards"></div>
+  <div id="main"></div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const ORIGENS  = ["Outbound","Inbound","Eventos","Indicação e Networking","Indicação","BNI"];
+const TIPOS    = ["Cross-sell","Upsell","New Logo","Renovação"];
+const PRODUTOS = ["Advisoring","Recrutamento e Seleção","Mentoria Líderes","Mentoria Vendedores","Curso On-line Inside Sales"];
+const ETAPAS   = ["Prospecção","Desenvolvimento","Qualificação","Negociação","Fechamento","Fechado Ganho","Fechado Perdido"];
+const OWNERS   = ["Ghirotti","Max"];
+const MODELOS  = ["80% - 20%","75% - 25%","50% - 50%"];
+const TEMPS    = ["Forecast","Upside","Ommited"];
+
+const ETAPA_META = {
+  "Prospecção":     {c:"#5F5E5A",bg:"#F1EFE8"},
+  "Desenvolvimento":{c:"#185FA5",bg:"#DBEAFE"},
+  "Qualificação":   {c:"#854F0B",bg:"#FEF3C7"},
+  "Negociação":     {c:"#0F6E56",bg:"#D1FAE5"},
+  "Fechamento":     {c:"#3B6D11",bg:"#DCFCE7"},
+  "Fechado Ganho":  {c:"#085041",bg:"#A7F3D0"},
+  "Fechado Perdido":{c:"#993C1D",bg:"#FEE2E2"},
+};
+const TEMP_META = {
+  "Forecast":{c:"#3B6D11",bg:"#DCFCE7"},
+  "Upside":  {c:"#854F0B",bg:"#FEF3C7"},
+  "Ommited": {c:"#5F5E5A",bg:"#F3F4F6"},
+};
+
+const INIT_DEALS = [
+  {id:1, empresa:"Haaify",             origem:"Eventos",               evento:"Blip",             tipo:"",         produto:"Advisoring",             etapa:"",               dtFech:"2026-06-30", mrr:20000, arr:"", temp:"",        dur:"",   horas:20,  steps:"Rodar diagnóstico",                   contato:"",                  owner:"",        modelo:""},
+  {id:2, empresa:"SharkDev",           origem:"Eventos",               evento:"Blip",             tipo:"",         produto:"Advisoring",             etapa:"",               dtFech:"2026-06-30", mrr:20000, arr:"", temp:"",        dur:"",   horas:20,  steps:"Reunião agendada",                    contato:"",                  owner:"",        modelo:""},
+  {id:3, empresa:"Network Secure",     origem:"Indicação e Networking",evento:"",                 tipo:"",         produto:"Advisoring",             etapa:"",               dtFech:"2026-06-30", mrr:20000, arr:"", temp:"",        dur:"",   horas:20,  steps:"Reunião agendada",                    contato:"",                  owner:"",        modelo:""},
+  {id:4, empresa:"Darede",             origem:"Outbound",              evento:"",                 tipo:"",         produto:"Advisoring",             etapa:"",               dtFech:"2026-06-30", mrr:25000, arr:"", temp:"",        dur:"",   horas:20,  steps:"Reunião agendada para junho",         contato:"",                  owner:"",        modelo:""},
+  {id:5, empresa:"SND",                origem:"Outbound",              evento:"",                 tipo:"New Logo", produto:"Advisoring",             etapa:"Qualificação",   dtFech:"2026-06-30", mrr:8000,  arr:"", temp:"Forecast",dur:"6",  horas:15,  steps:"FUP no Bruno",                        contato:"Bruno Coimbra",     owner:"Ghirotti",modelo:"80% - 20%"},
+  {id:6, empresa:"SND",                origem:"Outbound",              evento:"",                 tipo:"New Logo", produto:"Mentoria Vendedores",    etapa:"Negociação",     dtFech:"2026-06-30", mrr:"",    arr:25000,temp:"Forecast",dur:"6",horas:4,  steps:"FUP no Bruno",                        contato:"Bruno Coimbra",     owner:"Ghirotti",modelo:"50% - 50%"},
+  {id:7, empresa:"Donarte",            origem:"BNI",                   evento:"",                 tipo:"",         produto:"Advisoring",             etapa:"",               dtFech:"2026-06-30", mrr:4000,  arr:"", temp:"",        dur:"",   horas:5,   steps:"FUP no Leonardo",                     contato:"Leonardo",          owner:"",        modelo:""},
+  {id:8, empresa:"Polaris",            origem:"BNI",                   evento:"",                 tipo:"",         produto:"Advisoring",             etapa:"",               dtFech:"2026-06-30", mrr:4000,  arr:"", temp:"",        dur:"",   horas:5,   steps:"Reunião agendada",                    contato:"",                  owner:"",        modelo:""},
+  {id:9, empresa:"Fernanda Costacurta",origem:"Eventos",               evento:"Maestria ao Vivo", tipo:"",         produto:"Advisoring",             etapa:"",               dtFech:"2026-05-30", mrr:4000,  arr:"", temp:"",        dur:"6",  horas:5,   steps:"Reunião agendada",                    contato:"Fernanda Costacurta",owner:"",       modelo:""},
+  {id:10,empresa:"Rodrigo Sodero",     origem:"Eventos",               evento:"Maestria ao Vivo", tipo:"",         produto:"Advisoring",             etapa:"",               dtFech:"2026-06-30", mrr:4000,  arr:"", temp:"",        dur:"6",  horas:5,   steps:"Apresentação da oferta",              contato:"Rodrigo Sodero",    owner:"",        modelo:""},
+  {id:11,empresa:"Ser Mais Digital",   origem:"Eventos",               evento:"Maestria ao Vivo", tipo:"New Logo", produto:"Advisoring",             etapa:"Desenvolvimento",dtFech:"2026-06-30", mrr:4000,  arr:"", temp:"",        dur:"6",  horas:5,   steps:"FUP no Fabrício",                     contato:"Fabrício Pequeno",  owner:"",        modelo:""},
+  {id:12,empresa:"Hywork",             origem:"Outbound",              evento:"",                 tipo:"New Logo", produto:"Advisoring",             etapa:"Desenvolvimento",dtFech:"2026-06-30", mrr:6000,  arr:"", temp:"",        dur:"24", horas:5,   steps:"FUP no Luiz",                         contato:"Luiz Campolongo",   owner:"Ghirotti",modelo:"80% - 20%"},
+  {id:13,empresa:"Qualiserv",          origem:"Indicação",             evento:"",                 tipo:"Cross-sell",produto:"Recrutamento e Seleção",etapa:"Negociação",     dtFech:"2026-06-30", mrr:"",    arr:30000,temp:"",       dur:"",   horas:"",  steps:"FUP no Kleber",                       contato:"Kleber",            owner:"Max",     modelo:"50% - 50%"},
+  {id:14,empresa:"Braga",              origem:"Indicação",             evento:"",                 tipo:"Cross-sell",produto:"Recrutamento e Seleção",etapa:"Negociação",     dtFech:"2026-06-30", mrr:"",    arr:20000,temp:"",       dur:"",   horas:"",  steps:"Enviar candidatos",                   contato:"Betina",            owner:"Max",     modelo:"50% - 50%"},
+  {id:15,empresa:"Skyone",             origem:"Indicação",             evento:"",                 tipo:"New Logo", produto:"Recrutamento e Seleção",etapa:"Negociação",     dtFech:"2026-06-30", mrr:"",    arr:30000,temp:"Upside", dur:"",   horas:"",  steps:"Enviar candidatos",                   contato:"Luciana",           owner:"Max",     modelo:"50% - 50%"},
+  {id:16,empresa:"Múltipla",           origem:"Indicação",             evento:"",                 tipo:"Cross-sell",produto:"Recrutamento e Seleção",etapa:"Negociação",     dtFech:"2026-06-30", mrr:"",    arr:5000, temp:"Upside", dur:"",   horas:"",  steps:"Enviar candidato e posicionar Vini",  contato:"Vinicius",          owner:"Max",     modelo:"50% - 50%"},
+];
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let deals = [];
+let view  = "table"; // "table" | "edit"
+let editing = null;
+let filters = {q:"", owner:"", etapa:"", produto:""};
+
+function loadDeals(){
+  try {
+    const s = localStorage.getItem("ghitec-crm-v1");
+    if(s) return JSON.parse(s);
+  } catch(e){}
+  return JSON.parse(JSON.stringify(INIT_DEALS));
+}
+function saveDeals(){
+  try { localStorage.setItem("ghitec-crm-v1", JSON.stringify(deals)); } catch(e){}
+}
+
+// ─── Utils ────────────────────────────────────────────────────────────────────
+function getPipeline(d){
+  const arr = Number(d.arr)||0;
+  const mrr = Number(d.mrr)||0;
+  const dur = Number(d.dur)||12;
+  return arr || mrr*dur;
+}
+function fmtK(v){
+  if(!v) return "—";
+  if(v>=1000000) return `R$ ${(v/1000000).toFixed(1)}M`;
+  return `R$ ${Math.round(v/1000)}k`;
+}
+function fmtDate(s){
+  if(!s) return "—";
+  const d = new Date(s+"T12:00:00");
+  return d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit"});
+}
+function badge(text, meta){
+  if(!text || !meta) return `<span class="td-empty">—</span>`;
+  return `<span class="badge" style="background:${meta.bg};color:${meta.c};border:1px solid ${meta.c}40">${text}</span>`;
+}
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 2200);
+}
+function sel(id){ return document.getElementById(id); }
+
+// ─── Active deals & metrics ───────────────────────────────────────────────────
+function active(){ return deals.filter(d=>d.etapa!=="Fechado Ganho"&&d.etapa!=="Fechado Perdido"); }
+function filteredDeals(){
+  return deals.filter(d=>{
+    const q = filters.q.toLowerCase();
+    if(q && !d.empresa.toLowerCase().includes(q) && !d.contato.toLowerCase().includes(q)) return false;
+    if(filters.owner && d.owner!==filters.owner) return false;
+    if(filters.etapa && d.etapa!==filters.etapa) return false;
+    if(filters.produto && d.produto!==filters.produto) return false;
+    return true;
+  });
+}
+
+// ─── Render metrics cards ─────────────────────────────────────────────────────
+function renderCards(){
+  const act = active();
+  const totalMRR  = act.reduce((a,d)=>a+(Number(d.mrr)||0),0);
+  const totalPipe = act.reduce((a,d)=>a+getPipeline(d),0);
+  const negCount  = deals.filter(d=>d.etapa==="Negociação").length;
+  sel("cards").innerHTML = `
+    <div class="card"><div class="card-label"><i class="ti ti-building"></i> Deals ativos</div><div class="card-value">${act.length}</div></div>
+    <div class="card"><div class="card-label"><i class="ti ti-trending-up"></i> MRR total</div><div class="card-value">${fmtK(totalMRR)}</div></div>
+    <div class="card"><div class="card-label"><i class="ti ti-cash"></i> Pipeline total</div><div class="card-value">${fmtK(totalPipe)}</div></div>
+    <div class="card accent"><div class="card-label"><i class="ti ti-flame"></i> Em negociação</div><div class="card-value">${negCount}</div></div>
+  `;
+}
+
+// ─── Render header button ─────────────────────────────────────────────────────
+function renderHeaderBtn(){
+  if(view==="table"){
+    sel("header-btn").innerHTML = `<button class="btn-new" onclick="newDeal()"><i class="ti ti-plus"></i> Novo Deal</button>`;
+  } else {
+    sel("header-btn").innerHTML = `<button class="btn-back" onclick="goTable()"><i class="ti ti-arrow-left"></i> Voltar</button>`;
+  }
+}
+
+// ─── Render table ─────────────────────────────────────────────────────────────
+function renderTable(){
+  const rows = filteredDeals();
+  sel("main").innerHTML = `
+    <div class="filters">
+      <div class="filter-search">
+        <i class="ti ti-search"></i>
+        <input type="text" placeholder="Empresa ou contato..." value="${esc(filters.q)}" oninput="filters.q=this.value;renderTable()">
+      </div>
+      <select onchange="filters.owner=this.value;renderTable()" style="flex:0 0 130px">
+        <option value="">Todos owners</option>
+        ${OWNERS.map(o=>`<option value="${o}"${filters.owner===o?" selected":""}>${o}</option>`).join("")}
+      </select>
+      <select onchange="filters.etapa=this.value;renderTable()" style="flex:0 0 148px">
+        <option value="">Todas etapas</option>
+        ${ETAPAS.map(o=>`<option value="${o}"${filters.etapa===o?" selected":""}>${o}</option>`).join("")}
+      </select>
+      <select onchange="filters.produto=this.value;renderTable()" style="flex:0 0 158px">
+        <option value="">Todos produtos</option>
+        ${PRODUTOS.map(o=>`<option value="${o}"${filters.produto===o?" selected":""}>${o}</option>`).join("")}
+      </select>
+      <span class="filter-count">${rows.length} deal${rows.length!==1?"s":""}</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <colgroup>
+          <col style="width:14%"><col style="width:12%"><col style="width:13%">
+          <col style="width:9%"><col style="width:8%"><col style="width:8%">
+          <col style="width:8%"><col style="width:9%"><col style="width:19%">
+        </colgroup>
+        <thead><tr>
+          <th>Empresa</th><th>Produto</th><th>Etapa</th>
+          <th>Temp.</th><th>Owner</th><th>MRR</th>
+          <th>ARR</th><th>Fechamento</th><th>Próximos passos</th>
+        </tr></thead>
+        <tbody>
+          ${rows.length===0
+            ? `<tr><td colspan="9" class="no-results"><i class="ti ti-search-off" style="font-size:24px;display:block;margin-bottom:6px"></i>Nenhum deal encontrado</td></tr>`
+            : rows.map(d=>`
+            <tr onclick="openEdit(${d.id})">
+              <td class="td-main">${esc(d.empresa)||"<em style='color:#D1D5DB'>nova empresa</em>"}</td>
+              <td class="td-sec">${esc(d.produto)||"—"}</td>
+              <td>${badge(d.etapa, ETAPA_META[d.etapa])}</td>
+              <td>${badge(d.temp, TEMP_META[d.temp])}</td>
+              <td class="${d.owner?"td-sec":"td-empty"}">${esc(d.owner)||"—"}</td>
+              <td class="${d.mrr?"td-val":"td-empty"}">${d.mrr?fmtK(Number(d.mrr)):"—"}</td>
+              <td class="${d.arr?"td-val":"td-empty"}">${d.arr?fmtK(Number(d.arr)):"—"}</td>
+              <td class="td-sec">${fmtDate(d.dtFech)}</td>
+              <td class="td-sec">${esc(d.steps)||"—"}</td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+    <div class="legend">
+      ${Object.entries(ETAPA_META).map(([k,v])=>`
+        <div class="legend-item"><span class="legend-dot" style="background:${v.c}"></span>${k}</div>
+      `).join("")}
+    </div>
+  `;
+}
+
+// ─── Render edit form ─────────────────────────────────────────────────────────
+function renderEdit(){
+  const d = editing;
+  const pipeVal = getPipeline(d);
+  const pipeDetail = d.mrr && d.dur && !d.arr
+    ? `(${fmtK(Number(d.mrr))}/mês × ${d.dur} meses)`
+    : (!d.mrr && !d.arr ? "" : d.mrr && !d.dur && !d.arr ? "(MRR × 12 meses padrão)" : "");
+
+  function selOpts(arr, val, empty=true){
+    return (empty?`<option value="">Selecionar...</option>`:"")+arr.map(o=>`<option value="${esc(o)}"${val===o?" selected":""}>${esc(o)}</option>`).join("");
+  }
+
+  sel("main").innerHTML = `
+    <div class="edit-header">
+      <div class="edit-title">${esc(d.empresa)||"Novo Deal"}</div>
+      ${d.etapa ? badge(d.etapa, ETAPA_META[d.etapa]) : ""}
+      ${d.temp  ? badge(d.temp,  TEMP_META[d.temp])   : ""}
+    </div>
+    <div class="form-grid">
+      <div class="form-field"><label>Empresa</label><input id="f-empresa" value="${esc(d.empresa)}" placeholder="Nome da empresa" oninput="editing.empresa=this.value"></div>
+      <div class="form-field"><label>Origem</label><select id="f-origem" onchange="editing.origem=this.value">${selOpts(ORIGENS,d.origem)}</select></div>
+      <div class="form-field"><label>Evento</label><input id="f-evento" value="${esc(d.evento)}" placeholder="Ex: Blip, Maestria ao Vivo" oninput="editing.evento=this.value"></div>
+      <div class="form-field"><label>Tipo</label><select onchange="editing.tipo=this.value">${selOpts(TIPOS,d.tipo)}</select></div>
+      <div class="form-field"><label>Produto</label><select onchange="editing.produto=this.value">${selOpts(PRODUTOS,d.produto)}</select></div>
+      <div class="form-field"><label>Etapa</label><select onchange="editing.etapa=this.value;refreshBadges()">${selOpts(ETAPAS,d.etapa)}</select></div>
+      <div class="form-field"><label>Owner</label><select onchange="editing.owner=this.value">${selOpts(OWNERS,d.owner)}</select></div>
+      <div class="form-field"><label>Modelo (split)</label><select onchange="editing.modelo=this.value">${selOpts(MODELOS,d.modelo)}</select></div>
+      <div class="form-field"><label>Temperatura</label><select onchange="editing.temp=this.value;refreshBadges()">${selOpts(TEMPS,d.temp)}</select></div>
+      <div class="form-field"><label>Contato</label><input value="${esc(d.contato)}" placeholder="Nome do contato" oninput="editing.contato=this.value"></div>
+      <div class="form-field"><label>Valor MRR (R$)</label><input type="number" value="${d.mrr||""}" placeholder="Ex: 8000" oninput="editing.mrr=this.value;refreshPipe()"></div>
+      <div class="form-field"><label>Valor ARR (R$)</label><input type="number" value="${d.arr||""}" placeholder="Ex: 25000" oninput="editing.arr=this.value;refreshPipe()"></div>
+      <div class="form-field"><label>Duração (meses)</label><input type="number" value="${d.dur||""}" placeholder="Ex: 6" oninput="editing.dur=this.value;refreshPipe()"></div>
+      <div class="form-field"><label>Horas mensais</label><input type="number" value="${d.horas||""}" placeholder="Ex: 20" oninput="editing.horas=this.value"></div>
+      <div class="form-field"><label>Data de fechamento</label><input type="date" value="${d.dtFech||""}" oninput="editing.dtFech=this.value"></div>
+    </div>
+    <div class="form-field"><label>Próximos passos</label>
+      <textarea placeholder="Descreva as próximas ações para este deal..." oninput="editing.steps=this.value">${esc(d.steps)}</textarea>
+    </div>
+    <div id="pipe-preview" class="preview-pipe" style="display:${pipeVal?'flex':'none'}">
+      <span class="label">Pipeline estimado:</span>
+      <span class="value" id="pipe-val">${fmtK(pipeVal)}</span>
+      <span class="detail" id="pipe-detail">${pipeDetail}</span>
+    </div>
+    <div class="form-actions">
+      <button class="btn-del" onclick="deleteDeal()"><i class="ti ti-trash"></i> Excluir</button>
+      <div class="form-actions-right">
+        <button class="btn-cancel" onclick="goTable()">Cancelar</button>
+        <button class="btn-save" onclick="saveDeal()"><i class="ti ti-check"></i> Salvar alterações</button>
+      </div>
+    </div>
+  `;
+}
+
+function refreshBadges(){
+  const h = sel("main").querySelector(".edit-header");
+  if(!h) return;
+  const badges = h.querySelectorAll(".badge");
+  badges.forEach(b=>b.remove());
+  if(editing.etapa){ const span=document.createElement("span"); span.innerHTML=badge(editing.etapa,ETAPA_META[editing.etapa]); h.appendChild(span.firstChild); }
+  if(editing.temp) { const span=document.createElement("span"); span.innerHTML=badge(editing.temp, TEMP_META[editing.temp]);  h.appendChild(span.firstChild); }
+}
+
+function refreshPipe(){
+  const p = getPipeline(editing);
+  const pre = sel("pipe-preview");
+  if(!pre) return;
+  if(p){ pre.style.display="flex"; sel("pipe-val").textContent=fmtK(p);
+    const det = editing.mrr&&editing.dur&&!editing.arr ? `(${fmtK(Number(editing.mrr))}/mês × ${editing.dur} meses)` : (!editing.mrr&&!editing.arr?"":editing.mrr&&!editing.dur&&!editing.arr?"(MRR × 12 meses padrão)":"");
+    sel("pipe-detail").textContent=det;
+  } else { pre.style.display="none"; }
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+function openEdit(id){
+  editing = {...deals.find(d=>d.id===id)};
+  view = "edit";
+  renderHeaderBtn();
+  renderEdit();
+}
+
+function newDeal(){
+  editing = {id:Date.now(),empresa:"",origem:"",evento:"",tipo:"",produto:"",etapa:"",dtFech:"",mrr:"",arr:"",temp:"",dur:"",horas:"",steps:"",contato:"",owner:"",modelo:""};
+  view = "edit";
+  renderHeaderBtn();
+  renderEdit();
+}
+
+function goTable(){
+  editing = null; view = "table";
+  renderHeaderBtn(); renderTable();
+}
+
+function saveDeal(){
+  const exists = deals.some(d=>d.id===editing.id);
+  if(exists){
+    deals = deals.map(d=>d.id===editing.id?{...editing}:d);
+  } else {
+    deals.push({...editing});
+  }
+  saveDeals(); renderCards(); goTable();
+  toast("✓ Deal salvo com sucesso");
+}
+
+function deleteDeal(){
+  if(!confirm(`Excluir o deal "${editing.empresa||"este deal"}"?`)) return;
+  deals = deals.filter(d=>d.id!==editing.id);
+  saveDeals(); renderCards(); goTable();
+  toast("Deal excluído");
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+deals = loadDeals();
+renderHeaderBtn();
+renderCards();
+renderTable();
+</script>
+</body>
+</html>
